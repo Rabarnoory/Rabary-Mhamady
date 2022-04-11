@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Document</title>
+
+
+
+    <!-- second map SDK -->
+    <script type='text/javascript'
+        src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AtRmPgAJ3_n9FX5WMCAig1MLx55W9UdFqTAlEMQeMdHGuO3XiG1WEaNgtcE1gcY3'
+        async defer></script>
+
+    <script>
+        function GetMap() {
+            var map = new Microsoft.Maps.Map('#myMap')
+        }
+    </script>
+    <!-- ************************************************************************************* -->
+
+    <!-- the therd map -->
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.22/"></script>
+
+    <script>
+        require(["esri/config", "esri/Map", "esri/views/MapView"], function (esriConfig, Map, MapView) {
+            esriConfig.apiKey = "AAPKfb3592a4dfe1404c878a8fa64ff8ce33S0WJqfj8ul7kyQu7BN0MBKVhhkXHR_5jriqqRY12Pvx71tnxI7mTGrmzpYENh0n0";
+            const map = new Map({
+                basemap: "arcgis-topographic" // Basemap layer service
+            });
+
+            const view = new MapView({
+                map: map,
+                center: [-36.234, 44.7888], // Longitude, latitude
+                zoom: 1, // Zoom level
+                container: "viewDiv" // Div element
+            });
+
+        });
+
+    </script>
+
+    <!-- ************************************************************************************* -->
+
+    <!-- forth map -->
+
+    <link rel='stylesheet' type='text/css' href='https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.5.0/maps/maps.css'>
+    <script onload="mapContent();" src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.5.0/maps/maps-web.min.js"
+        defer></script>
+
+    <!-- *************************************************** -->
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="../test4.html">Navbar</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="main.html">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="covid-19-master/index.html">Covid-19</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="weather-app-tutorial-main/index.html">Weather</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+    <!-- google map for hawler -->
+
+    <div class="container-fluid p-3 shadow-sm rounded text-center"
+        style="background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(164,200,198,1) 0%, rgba(0,212,255,1) 100%);">
+        <div class="row p-4">
+            <div class="col-md-12">
+                <div class="hawler ">
+                    <h1>Hawler</h1>
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d134901.0933023985!2d44.072097003265355!3d36.20126186452248!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x400722fe13443461%3A0x3e01d63391de79d1!2sErbil!5e0!3m2!1sen!2siq!4v1648802814830!5m2!1sen!2siq"
+                        width="1400" height="500" style="border:0;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="">
+                    <h1>Microsoft map</h1>
+                    <div id="myMap" style="position:relative; width: 100%;height:500px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="therd_map">
+                    <h1>Esri Map</h1>
+                    <div id="viewDiv" style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="forth_map">
+                    <h1>Tomato map</h1>
+                    <div id='map' style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- the scrip for the forth map -->
+    <script>
+        function mapContent() {
+            var api_key = 'zJhNAHyyBDidEXSGC62zWPEjDn6ggqHn';
+            var latAndLong = { lat: 35.5558, lng: 45.4351 };
+            var zoomLevel = 14;
+            var yourAddress = 'sulaymani';
+
+            var map = tt.map({
+                container: 'map',
+                key: api_key,
+                center: latAndLong,
+                zoom: zoomLevel
+            });
+
+            var marker = new tt.Marker().setLngLat(latAndLong).addTo(map);
+
+            var popupOffsets = {
+                top: [0, 0],
+                bottom: [0, -70],
+                'bottom-right': [0, -70],
+                'bottom-left': [0, -70],
+                left: [25, -35],
+                right: [-25, -35]
+            }
+
+            var popup = new tt.Popup({ offset: popupOffsets }).setHTML(yourAddress);
+            marker.setPopup(popup).togglePopup();
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>

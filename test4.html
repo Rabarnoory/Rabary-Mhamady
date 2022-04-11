@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <title>Document</title>
+
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="main.html">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="covid-19-master/index.html">Covid-19</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="weather-app-tutorial-main/index.html">Weather</a>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
+
+
+
+
+  <div class="directionsContainer">
+    <div id="directionsPanel"></div>
+    <div id="directionsItinerary"></div>
+  </div>
+
+  <!-- the mape -->
+  <div class="container">
+    <div id="myMap"></div>
+  </div>
+
+
+  <script type="text/javascript">
+    let pin, loc, trafficManager, searchManager, map;
+    var directionsManager;
+
+    var sdsDataSourceUrl =
+      "https://spatial.virtualearth.net/REST/v1/data/f22876ec257b474b82fe2ffcb8393150/NavteqNA/NavteqPOIs";
+
+    function loadMapScenario() {
+      navigator.geolocation.getCurrentPosition((position) => {
+        loc = new Microsoft.Maps.Location(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+
+        //Add a pushpin at the user's location.
+        pin = new Microsoft.Maps.Pushpin(loc, {
+          title: "Your Location",
+          icon: "icons8-location-30.png",
+          // anchor: new Microsoft.Maps.Point(120, 39),
+        });
+
+        map.entities.push(pin);
+
+        //Center the map on the user's location.
+        map.setView({ center: loc, zoom: 10 });
+      });
+
+      map = new Microsoft.Maps.Map("#myMap", {
+        /* No need to set credentials if already passed in URL */
+        credentials:
+          "AiMVGZphyufs1_2uimnWVQipItGsS5utbX1T1mv7pYRDh83qOonrRzGxK1rhezJ3",
+        center: loc,
+        mapTypeId: Microsoft.Maps.MapTypeId.birdseye,
+      });
+
+      Microsoft.Maps.loadModule(
+        [
+          "Microsoft.Maps.SpatialDataService",
+          "Microsoft.Maps.Search",
+          "Microsoft.Maps.AutoSuggest",
+        ],
+        function () {
+          var manager = new Microsoft.Maps.AutosuggestManager({ map: map });
+          manager.attachAutosuggest(
+            "#searchBox",
+            "#searchBoxContainer",
+            selectedSuggestion
+          );
+        }
+      );
+
+      // Load traffic module.
+      Microsoft.Maps.loadModule("Microsoft.Maps.Traffic", () => {
+        var manager = new Microsoft.Maps.Traffic.TrafficManager(map);
+        manager.show();
+      });
+
+      Microsoft.Maps.loadModule("Microsoft.Maps.Directions", () => {
+        //Create an instance of the directions manager.
+        directionsManager = new Microsoft.Maps.Directions.DirectionsManager(
+          map
+        );
+
+        //Specify where to display the route instructions.
+        directionsManager.setRenderOptions({
+          itineraryContainer: "#directionsItinerary",
+        });
+
+        //Specify the where to display the input panel
+        directionsManager.showInputPanel("directionsPanel");
+      });
+
+      var layer = new Microsoft.Maps.Layer();
+      map.layers.insert(layer);
+    }
+
+    function Search() {
+      //Remove all data from the map.
+      map.entities.clear();
+
+      //Create the geocode request.
+      var geocodeRequest = {
+        where: document.getElementById("searchBox").value,
+        callback: getBoundary,
+        errorCallback: (e) => {
+          //If there is an error, alert the user about it.
+          alert("No results found.");
+        },
+      };
+
+      //Make the geocode request.
+      searchManager.geocode(geocodeRequest);
+    }
+
+    function getBoundary(geocodeResult) {
+      //Add the first result to the map and zoom into it.
+      if (
+        geocodeResult &&
+        geocodeResult.results &&
+        geocodeResult.results.length > 0
+      ) {
+        //Zoom into the location.
+        map.setView({ bounds: geocodeResult.results[0].bestView });
+
+        //Create the request options for the GeoData API.
+        var geoDataRequestOptions = {
+          lod: 1,
+          getAllPolygons: true,
+        };
+
+        //Verify that the geocoded location has a supported entity type.
+        switch (geocodeResult.results[0].entityType) {
+          case "CountryRegion":
+          case "AdminDivision1":
+          case "AdminDivision2":
+          case "Postcode1":
+          case "Postcode2":
+          case "Postcode3":
+          case "Postcode4":
+          case "Neighborhood":
+          case "PopulatedPlace":
+            geoDataRequestOptions.entityType =
+              geocodeResult.results[0].entityType;
+            break;
+          default:
+            //Display a pushpin if GeoData API does not support EntityType.
+            var pin = new Microsoft.Maps.Pushpin(
+              geocodeResult.results[0].location
+            );
+            map.entities.push(pin);
+            return;
+        }
+
+        //Use the GeoData API manager to get the boundaries of the zip codes.
+        Microsoft.Maps.SpatialDataService.GeoDataAPIManager.getBoundary(
+          geocodeResult.results[0].location,
+          geoDataRequestOptions,
+          map,
+          (data) => {
+            //Add the polygons to the map.
+            if (data.results && data.results.length > 0) {
+              map.entities.push(data.results[0].Polygons);
+            } else {
+              //Display a pushpin if a boundary isn't found.
+              var pin = new Microsoft.Maps.Pushpin(data.location);
+              map.entities.push(pin);
+            }
+          }
+        );
+      }
+    }
+
+    function StartTracking() {
+      //Add a pushpin to show the user's location.
+      userPin = new Microsoft.Maps.Pushpin(map.getCenter(), {
+        visible: false,
+      });
+      map.entities.push(gpsPin);
+
+      //Watch the users location.
+      watchId = navigator.geolocation.watchPosition(UsersLocationUpdated);
+    }
+    function UsersLocationUpdated(position) {
+      var loc = new Microsoft.Maps.Location(
+        position.coords.latitude,
+        position.coords.longitude
+      );
+
+      //Update the user pushpin.
+      userPin.setLocation(loc);
+      userPin.setOptions({ visible: true });
+
+      //Center the map on the user's location.
+      map.setView({ center: loc });
+    }
+
+    function selectedSuggestion(result) {
+      //Remove previously selected suggestions from the map.
+      map.entities.clear();
+
+      //Show the suggestion as a pushpin and center map over it.
+      var pin = new Microsoft.Maps.Pushpin(result.location);
+      map.entities.push(pin);
+      map.setView({ bounds: result.bestView });
+    }
+  </script>
+  <script type="text/javascript"
+    src="https://www.bing.com/api/maps/mapcontrol?key=AiMVGZphyufs1_2uimnWVQipItGsS5utbX1T1mv7pYRDh83qOonrRzGxK1rhezJ3&callback=loadMapScenario"
+    async defer></script>
+
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
